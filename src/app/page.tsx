@@ -26,15 +26,14 @@ export default function Page() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    // Splatoonっぽいカラーパレット
-    const colors = ['#00d8ff', '#ffde00', '#ff3f34', '#32ff7e'];
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    const radius = 50 + Math.random() * 70;      // 大きさをランダムに
+    // 緑色のインク
+    const color = '#2ecc71';
+    const radius = 40 + Math.random() * 60;      // 大きさをランダムに
 
     drawSplat(ctx, x, y, radius, color);
   };
 
-  // インクの“ブロブ”を描く関数
+  // インクの"ブロブ"を描く関数
   function drawSplat(
     ctx: CanvasRenderingContext2D,
     x: number,
@@ -44,19 +43,51 @@ export default function Page() {
   ) {
     ctx.fillStyle = color;
     ctx.beginPath();
-    const spikes = 8 + Math.floor(Math.random() * 6);  // トゲの数
-    for (let i = 0; i < spikes; i++) {
-      const angle = (i / spikes) * Math.PI * 2;
-      const r = radius * (0.6 + Math.random() * 0.4);
-      ctx.lineTo(x + r * Math.cos(angle), y + r * Math.sin(angle));
+    
+    // より不規則な形状を生成
+    const points = 12 + Math.floor(Math.random() * 8);
+    const angleStep = (Math.PI * 2) / points;
+    
+    for (let i = 0; i < points; i++) {
+      const angle = i * angleStep;
+      const randomRadius = radius * (0.5 + Math.random() * 0.8);
+      const xOffset = Math.cos(angle) * randomRadius;
+      const yOffset = Math.sin(angle) * randomRadius;
+      
+      if (i === 0) {
+        ctx.moveTo(x + xOffset, y + yOffset);
+      } else {
+        // ベジェ曲線で滑らかな曲線を描く
+        const prevAngle = (i - 1) * angleStep;
+        const midAngle = (angle + prevAngle) / 2;
+        const controlRadius = randomRadius * (0.8 + Math.random() * 0.4);
+        const controlX = x + Math.cos(midAngle) * controlRadius;
+        const controlY = y + Math.sin(midAngle) * controlRadius;
+        
+        ctx.quadraticCurveTo(controlX, controlY, x + xOffset, y + yOffset);
+      }
     }
+    
     ctx.closePath();
     ctx.fill();
 
-    // 中心にもう一度丸を描いて“インクの濃い部分”を表現
+    // 中心部分をより濃く
     ctx.beginPath();
-    ctx.arc(x, y, radius * 0.4, 0, Math.PI * 2);
+    ctx.arc(x, y, radius * 0.5, 0, Math.PI * 2);
     ctx.fill();
+
+    // 小さな飛沫を追加
+    for (let i = 0; i < 8; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const distance = radius * (0.8 + Math.random() * 0.4);
+      const splashX = x + Math.cos(angle) * distance;
+      const splashY = y + Math.sin(angle) * distance;
+      const splashRadius = radius * (0.1 + Math.random() * 0.15);
+      
+      ctx.beginPath();
+      ctx.arc(splashX, splashY, splashRadius, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 
   return (
