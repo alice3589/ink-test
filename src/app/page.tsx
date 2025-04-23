@@ -8,7 +8,6 @@ export default function Page() {
   // 画面リサイズ対応
   useEffect(() => {
     const canvas = canvasRef.current!;
-    const ctx = canvas.getContext('2d')!;
 
     function resize() {
       canvas.width  = window.innerWidth;
